@@ -60,9 +60,16 @@ jobs:
 
     environment: aws_lambda_deployment
 
+    # env:
+    #   AWS_ACCESS_KEY_ID: ${{secrets.AWS_ACCESS_KEY_ID}}
+    #   AWS_SECRET_ACCESS_KEY: ${{secrets.AWS_SECRET_ACCESS_KEY}}
     env:
-      AWS_ACCESS_KEY_ID: ${{secrets.AWS_ACCESS_KEY_ID}}
-      AWS_SECRET_ACCESS_KEY: ${{secrets.AWS_SECRET_ACCESS_KEY}}
+      BUCKET_NAME : ""
+      AWS_REGION : ""
+    # permission can be added at job level or workflow level
+    permissions:
+      id-token: write   # This is required for requesting the JWT
+      contents: read
 
     steps:
     - uses: actions/checkout@v3
@@ -85,6 +92,14 @@ jobs:
 
     - name: Check SLS version
       run: sls --version
+
+    - name: configure aws credentials
+      uses: aws-actions/configure-aws-credentials@v3
+      with:
+        #TODO: Add arn
+        role-to-assume: arn:
+        role-session-name: samplerolesession
+        aws-region: ${{ env.AWS_REGION }}
 
     - name: Deploy to Lambda
       run: make deploy
